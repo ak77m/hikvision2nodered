@@ -2,7 +2,7 @@
 Receiving events from Hikvision devices in NodeRed.
 Only notification subscription is used.
 
-Unfortunately I couldn't get XML directly, NodeRed doesn't accept the format.
+Unfortunately I couldn't get XML directly, NodeRed doesn't accept Hik XML format.
 General idea of ​​this approach (many thanks to the author) - https://flows.nodered.org/flow/12569b0e9e05c773ce54aa923f68c110
 
 
