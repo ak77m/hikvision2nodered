@@ -8,6 +8,8 @@ General idea of ​​this approach (many thanks to the author) - https://flows.
 
 1. Setting up Hik device /ISAPI/Event/notification/httpHosts/1  to send events
    Example:
+   <pre>
+   ```
            <?xml version="1.0" encoding="UTF-8"?>
         <HttpHostNotification version="2.0" xmlns="http://www.hikvision.com/ver20/XMLSchema">
         <id>1</id>
@@ -20,11 +22,12 @@ General idea of ​​this approach (many thanks to the author) - https://flows.
         <userName></userName>
         <httpAuthenticationMethod>none</httpAuthenticationMethod>
         </HttpHostNotification>
+   </pre>
         
-2. Сheck on the NodeRed host side
+3. Сheck on the NodeRed host side
        sudo tcpdump -i [interface name] port 8080 -A
 
-3. Create flow
+4. Create flow
    Example:
    https://github.com/ak77m/hikvision2nodered/blob/main/Sample.json
     
