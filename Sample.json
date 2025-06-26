@@ -1,0 +1,253 @@
+[
+    {
+        "id": "3a7824226fcfa66d",
+        "type": "tab",
+        "label": "Hik",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "833db30a8cb93f9c",
+        "type": "http in",
+        "z": "3a7824226fcfa66d",
+        "name": "Cameras",
+        "url": "/cam",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 180,
+        "y": 180,
+        "wires": [
+            [
+                "cb9236ba739c664e"
+            ]
+        ]
+    },
+    {
+        "id": "f0a3fead9252c48a",
+        "type": "http response",
+        "z": "3a7824226fcfa66d",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 670,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "798019ce7bc287c6",
+        "type": "tcp in",
+        "z": "3a7824226fcfa66d",
+        "name": "",
+        "server": "server",
+        "host": "",
+        "port": "8080",
+        "datamode": "stream",
+        "datatype": "utf8",
+        "newline": "",
+        "topic": "",
+        "trim": false,
+        "base64": false,
+        "tls": "",
+        "x": 180,
+        "y": 280,
+        "wires": [
+            [
+                "c2ab47e157cea238",
+                "93d1a184c7381891"
+            ]
+        ]
+    },
+    {
+        "id": "eeacbf575d4041f8",
+        "type": "debug",
+        "z": "3a7824226fcfa66d",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "e8d7a1526a7361cf",
+        "type": "tcp out",
+        "z": "3a7824226fcfa66d",
+        "name": "",
+        "host": "",
+        "port": "",
+        "beserver": "reply",
+        "base64": false,
+        "end": false,
+        "tls": "",
+        "x": 590,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "c2ab47e157cea238",
+        "type": "template",
+        "z": "3a7824226fcfa66d",
+        "name": "Send 200 OK",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "HTTP/1.1 200 \nConnection: Close\nContent-Length: 2\n\nOK",
+        "output": "str",
+        "x": 400,
+        "y": 340,
+        "wires": [
+            [
+                "e8d7a1526a7361cf"
+            ]
+        ]
+    },
+    {
+        "id": "93d1a184c7381891",
+        "type": "function",
+        "z": "3a7824226fcfa66d",
+        "name": "Parse Request",
+        "func": "let rawBody = msg.payload.split('\\r\\n\\r\\n')[1] || '';\n\n// Удаляем BOM, управляющие символы и обрезаем пробелы\nrawBody = rawBody.replace(/^\\uFEFF/, '');\nrawBody = rawBody.replace(/[^\\x09\\x0A\\x0D\\x20-\\uFFFF]/g, '');\nrawBody = rawBody.trim();\n\n// Экранируем символ &\nrawBody = rawBody.replace(/&(?!(amp;|lt;|gt;|quot;|apos;))/g, '&amp;');\n\nmsg.payload = rawBody;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "httpZ",
+                "module": "http-z"
+            }
+        ],
+        "x": 400,
+        "y": 280,
+        "wires": [
+            [
+                "c93fd4b88d61e14c"
+            ]
+        ]
+    },
+    {
+        "id": "cb9236ba739c664e",
+        "type": "function",
+        "z": "3a7824226fcfa66d",
+        "name": "Redirect to Port 8080",
+        "func": "let hostname = msg.req.headers.host.split(\":\")[0]\nmsg.headers ={}\nmsg.headers.location = `http://${hostname}:8080${msg.req.url}`\nmsg.statusCode = 307\nmsg.payload = ''\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 180,
+        "wires": [
+            [
+                "f0a3fead9252c48a"
+            ]
+        ]
+    },
+    {
+        "id": "c93fd4b88d61e14c",
+        "type": "xml2json",
+        "z": "3a7824226fcfa66d",
+        "name": "Parse xml to json",
+        "x": 630,
+        "y": 280,
+        "wires": [
+            [
+                "eeacbf575d4041f8"
+            ]
+        ]
+    },
+    {
+        "id": "1bb7b097f4b5eff2",
+        "type": "function",
+        "z": "3a7824226fcfa66d",
+        "d": true,
+        "name": "Parse Request",
+        "func": "let rawBody = msg.payload.split('\\r\\n\\r\\n')[1]\n//node.warn(msg.payload)\nlet r = httpZ.parse(msg.payload);\n\nlet h = {}\nfor (let i = 0; i < r.headers.length; i++) {\n    let n = {}\n    n[r.headers[i]['name']] = r.headers[i]['value']\n    Object.assign(h, n);\n}\nr.headers = h\nr.rawBody = rawBody\nmsg.payload = r\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "httpZ",
+                "module": "http-z"
+            }
+        ],
+        "x": 400,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ede32bd504652e22",
+        "type": "http in",
+        "z": "3a7824226fcfa66d",
+        "name": "AX Pro",
+        "url": "/info",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 120,
+        "wires": [
+            [
+                "a0cfc4fb564055c4"
+            ]
+        ]
+    },
+    {
+        "id": "f099034d68d75b9c",
+        "type": "http response",
+        "z": "3a7824226fcfa66d",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 670,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "a0cfc4fb564055c4",
+        "type": "function",
+        "z": "3a7824226fcfa66d",
+        "name": "Redirect to Port 8080",
+        "func": "let hostname = msg.req.headers.host.split(\":\")[0]\nmsg.headers ={}\nmsg.headers.location = `http://${hostname}:8080${msg.req.url}`\nmsg.statusCode = 307\nmsg.payload = ''\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 120,
+        "wires": [
+            [
+                "f099034d68d75b9c"
+            ]
+        ]
+    },
+    {
+        "id": "8c3cef890b4ff5a6",
+        "type": "comment",
+        "z": "3a7824226fcfa66d",
+        "name": "Получение уведомлений с кривым XML телом",
+        "info": "",
+        "x": 280,
+        "y": 60,
+        "wires": []
+    }
+]
